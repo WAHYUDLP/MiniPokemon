@@ -1,0 +1,98 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
+public class WhichMonsterLayout {
+  private JPanel mainPanel = new JPanel(new GridBagLayout()) {
+    @Override
+    protected void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      g.drawImage(new ImageIcon("assets/Homebase.jpg").getImage(), 0, 0, getWidth(), getHeight(), this);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+      return new Dimension(600, 300);
+    }
+  };
+  private JPanel panelMonster = new JPanel();
+
+  private JLabel labelWelcome = new JLabel("Welcome back to Home Base!");
+
+  private JButton btnBack = new JButton("Back");
+
+  private List<PlayerMonster> playerMonsters;
+  private WhichMonsterListener listener;
+  private String actionName;
+
+  public WhichMonsterLayout(List<PlayerMonster> playerMonsters, String actionName, WhichMonsterListener listener) {
+    this.playerMonsters = playerMonsters;
+    this.listener = listener;
+    this.actionName = actionName;
+  }
+
+  public JPanel create() {
+    labelWelcome.setFont(FontUtils.getPixelBoldFont().deriveFont(24f));
+    labelWelcome.setForeground(Color.ORANGE);
+
+    btnBack.addActionListener(e -> {
+      listener.goBack();
+    });
+
+    panelMonster.setOpaque(false);
+    initChooseMonsterToPanel();
+    initCompToPanelMenu();
+    return mainPanel;
+  }
+
+  private void initCompToPanelMenu() {
+
+    mainPanel.add(panelMonster, GridBagUtils.createConstraints(0, 0));
+    mainPanel.add(btnBack, GridBagUtils.createConstraints(0, 1));
+  }
+
+  private void initChooseMonsterToPanel() {
+    for (PlayerMonster playerMonster : playerMonsters) {
+      JPanel panelMonster2 = new JPanel();
+
+      ImageIcon icon = new ImageIcon(playerMonster.imgPath);
+      ImageIcon icon2 = new ImageIcon(icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH));
+
+      JLabel labelImg = new JLabel(icon2);
+      JTextArea teaInfo = new JTextArea(
+          "Name: " + playerMonster.getNama() + 
+          "\n Level: " + playerMonster.getLevel() +
+          "\n Exp Point: " + playerMonster.getExpPoint() +
+          "\n HP Point: " + playerMonster.getHealthPoint() +
+          "\n Wins: " + playerMonster.getWins() +
+          "\n Elements: " + (playerMonster.getElement().isEmpty() ? "None" : playerMonster.getElement().get(0).getNama())+
+          "\n Envolved: " + (playerMonster.hasEvolved() ? "Yes" : "No")
+          );
+      JButton btn = new JButton(actionName);
+
+      panelMonster2.setLayout(new BoxLayout(panelMonster2, BoxLayout.Y_AXIS));
+      panelMonster2.setOpaque(false);
+
+      labelImg.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+      btn.setOpaque(false);
+      btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+   
+      btn.setFocusable(false);
+      btn.addActionListener(e -> {
+        listener.primaryAction(playerMonster);
+      });
+
+      panelMonster2.add(labelImg);
+      panelMonster2.add(teaInfo);
+      panelMonster2.add(btn);
+
+      panelMonster.add(panelMonster2);
+    }
+  }
+
+  public void refreshMonster() {
+    mainPanel.remove(panelMonster);
+    mainPanel.add(panelMonster, GridBagUtils.createConstraints(0, 0));
+  }
+}
